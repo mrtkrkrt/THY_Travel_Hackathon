@@ -1,11 +1,20 @@
-import React from 'react'
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link
+} from "react-router-dom";
+import Pages from "./views/Pages";
+import WebXR from "./views/WebXR";
 
-function App() {
+export default function App() {
   return (
-    <div>
-      <p>Deneme</p>
-    </div>
+    <Router>
+        <Routes>
+        <Route path="/" element={<Pages />}/>
+        <Route path="/webxr" element={<WebXR />}/>
+        </Routes>
+    </Router>
   );
 }
-
-export default App;
