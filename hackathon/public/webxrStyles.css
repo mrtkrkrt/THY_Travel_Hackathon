@@ -29,3 +29,8 @@ canvas {
 a, button, input, select {
 	pointer-events: auto;
 }
+
+.leaflet-container {
+	height: 75%;
+	width: 75%;
+}

@@ -1,191 +1,294 @@
 <html lang="en">
-  <head>
-    <title>Basic Scene with WebXR</title>
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, user-scalable=no"
-    />
-    <link type="text/css" rel="stylesheet" href="./webxrStyles.css" />
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r126/three.js"
-      crossorigin="anonymous"
-    ></script>
-    <script src="https://r105.threejsfundamentals.org/threejs/resources/threejs/r105/js/controls/OrbitControls.js"></script>
-    <script src="https://r105.threejsfundamentals.org/threejs/resources/threejs/r105/js/loaders/LoaderSupport.js"></script>
-    <script src="https://r105.threejsfundamentals.org/threejs/resources/threejs/r105/js/loaders/OBJLoader2.js"></script>
-    <script src="https://r105.threejsfundamentals.org/threejs/resources/threejs/r105/js/loaders/MTLLoader.js"></script>
-  </head>
+	<head>
+		<title>Basic Scene with WebXR</title>
+		<meta charset="utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+		<link type="text/css" rel="stylesheet" href="./webxrStyles.css" />
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r126/three.js"
+			crossorigin="anonymous"
+		></script>
+		<script src="https://r105.threejsfundamentals.org/threejs/resources/threejs/r105/js/controls/OrbitControls.js"></script>
+		<script src="https://r105.threejsfundamentals.org/threejs/resources/threejs/r105/js/loaders/LoaderSupport.js"></script>
+		<script src="https://r105.threejsfundamentals.org/threejs/resources/threejs/r105/js/loaders/OBJLoader2.js"></script>
+		<script src="https://r105.threejsfundamentals.org/threejs/resources/threejs/r105/js/loaders/MTLLoader.js"></script>
+    
+    <script src="/mapScript.js" defer></script>
+    <!-- import the Leaflet.js CSS and JavaScript files -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
+     integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+     crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
+     integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
+     crossorigin=""></script>
+	</head>
 
-  <body>
-    <div>latitude:<span id="latitude"></span></div>
-    <div>longitude:<span id="longitude"></span></div>
-    <div>webxr-camera-z:<span id="webxrcameraz"></span></div>
-    <div>test:<span id="test"></span></div>
-    <script type="module">
-      // To start an AR scene with webXR, we can use a handy button provided by three.js
-      // We first have to import it because it is a javascript module
-      import { ARButton } from "https://unpkg.com/three@0.126.0/examples/jsm/webxr/ARButton.js";
+	<body>
+    <div id="mapid"></div>
+		<div>latitude:<span id="latitude"></span></div>
+		<div>longitude:<span id="longitude"></span></div>
+		<div>webxr-camera-z:<span id="webxrcameraz"></span></div>
+		<div>test:<span id="test"></span></div>
+		<div>alpha:<span id="alpha"></span></div>
+		<div>beta:<span id="beta"></span></div>
+		<div>gamma:<span id="gamma"></span></div>
+    
+		<script type="module">
+			// To start an AR scene with webXR, we can use a handy button provided by three.js
+			// We first have to import it because it is a javascript module
+			import { ARButton } from "https://unpkg.com/three@0.126.0/examples/jsm/webxr/ARButton.js";
 
-      let camera, scene, renderer;
-      let mesh;
-      let root;
-      let time;
-      let cameraVector = new THREE.Vector3(); 
+			let camera, scene, renderer;
+			let mesh;
+			let root;
+			let time;
+			let cameraVector = new THREE.Vector3();
+      let initialAlpha = -1
 
-      init();
-      animate();
+			init();
+			animate();
 
-      const latitudeElem = document.querySelector("#latitude");
-      const longitudeElem = document.querySelector("#longitude");
-      const zElem = document.querySelector("#webxrcameraz");
-      const testElem = document.querySelector("#test");
+			const latitudeElem = document.querySelector("#latitude");
+			const longitudeElem = document.querySelector("#longitude");
+			const zElem = document.querySelector("#webxrcameraz");
+			const testElem = document.querySelector("#test");
+			const alphaElem = document.querySelector("#alpha");
+			const betaElem = document.querySelector("#beta");
+			const gammaElem = document.querySelector("#gamma");
 
-      function init() {
-        time = new Date();
-        const container = document.createElement("div");
-        document.body.appendChild(container);
+      const targetLat = 41.2001254
+      const targetLng = 36.7219158
 
-        scene = new THREE.Scene();
+			function init() {
+				time = new Date();
+				const container = document.createElement("div");
+        container.setAttribute("type","hidden")
 
-        camera = new THREE.PerspectiveCamera(
-          70,
-          window.innerWidth / window.innerHeight,
-          0.01,
-          40
-        );
-        const controls = new THREE.OrbitControls(camera, container);
-        controls.target.set(0, 5, 0);
-        controls.update();
+				scene = new THREE.Scene();
 
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        // This next line is important to to enable the renderer for WebXR
-        renderer.xr.enabled = true; // New!
-        container.appendChild(renderer.domElement);
+				camera = new THREE.PerspectiveCamera(
+					70,
+					window.innerWidth / window.innerHeight,
+					0.01,
+					40
+				);
+				const controls = new THREE.OrbitControls(camera, container);
+				controls.target.set(0, 5, 0);
+				controls.update();
 
-        var light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
-        light.position.set(0.5, 1, 0.25);
-        scene.add(light);
+				renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+				renderer.setPixelRatio(window.devicePixelRatio);
+				renderer.setSize(window.innerWidth, window.innerHeight);
+				// This next line is important to to enable the renderer for WebXR
+				renderer.xr.enabled = true; // New!
+				container.appendChild(renderer.domElement);
 
-        function frameArea(sizeToFitOnScreen, boxSize, boxCenter, camera) {
-          const halfSizeToFitOnScreen = sizeToFitOnScreen * 0.5;
-          const halfFovY = THREE.Math.degToRad(camera.fov * 0.5);
-          const distance = halfSizeToFitOnScreen / Math.tan(halfFovY);
-          // compute a unit vector that points in the direction the camera is now
-          // in the xz plane from the center of the box
-          const direction = new THREE.Vector3()
-            .subVectors(camera.position, boxCenter)
-            .multiply(new THREE.Vector3(1, 0, 1))
-            .normalize();
+				var light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
+				light.position.set(0.5, 1, 0.25);
+				scene.add(light);
 
-          // move the camera to a position distance units way from the center
-          // in whatever direction the camera was from the center already
-          camera.position.copy(
-            direction.multiplyScalar(distance).add(boxCenter)
-          );
+				function frameArea(sizeToFitOnScreen, boxSize, boxCenter, camera) {
+					const halfSizeToFitOnScreen = sizeToFitOnScreen * 0.5;
+					const halfFovY = THREE.Math.degToRad(camera.fov * 0.5);
+					const distance = halfSizeToFitOnScreen / Math.tan(halfFovY);
+					// compute a unit vector that points in the direction the camera is now
+					// in the xz plane from the center of the box
+					const direction = new THREE.Vector3()
+						.subVectors(camera.position, boxCenter)
+						.multiply(new THREE.Vector3(1, 0, 1))
+						.normalize();
 
-          // pick some near and far values for the frustum that
-          // will contain the box.
-          camera.near = boxSize / 100;
-          camera.far = boxSize * 100;
+					// move the camera to a position distance units way from the center
+					// in whatever direction the camera was from the center already
+					camera.position.copy(
+						direction.multiplyScalar(distance).add(boxCenter)
+					);
 
-          camera.updateProjectionMatrix();
+					// pick some near and far values for the frustum that
+					// will contain the box.
+					camera.near = boxSize / 100;
+					camera.far = boxSize * 100;
 
-          // point the camera to look at the center of the box
-          camera.lookAt(boxCenter.x, boxCenter.y, boxCenter.z);
-        }
+					camera.updateProjectionMatrix();
 
-        const objLoader = new THREE.OBJLoader2();
-        objLoader.loadMtl("./arrow.mtl", null, (materials) => {
-          objLoader.setMaterials(materials);
-          objLoader.load("./arrow.obj", (event) => {
-            root = event.detail.loaderRootNode;
-            root.scale.x = 0.3;
-            root.scale.y = 0.3;
-            root.scale.z = 0.3;
-            root.position.z = -1;
-            root.position.y = -0.5;
-            root.rotation.x = (Math.PI / 180) * 80;
+					// point the camera to look at the center of the box
+					camera.lookAt(boxCenter.x, boxCenter.y, boxCenter.z);
+				}
+
+				const objLoader = new THREE.OBJLoader2();
+				objLoader.loadMtl("./arrow.mtl", null, (materials) => {
+					objLoader.setMaterials(materials);
+					objLoader.load("./arrow.obj", (event) => {
+						root = event.detail.loaderRootNode;
+						root.scale.x = 0.3;
+						root.scale.y = 0.3;
+						root.scale.z = 0.3;
+						root.position.z = -1;
+						root.position.y = -0.5;
+						root.rotation.x = (Math.PI / 180) * 80;
+
+						camera.updateMatrixWorld();
+						var vector = camera.position.clone();
+						vector.applyMatrix4(camera.matrixWorld);
+
+						scene.add(root);
+
+						// compute the box that contains all the stuff
+						// from root and below
+						const box = new THREE.Box3().setFromObject(root);
+
+						const boxSize = box.getSize(new THREE.Vector3()).length();
+						const boxCenter = box.getCenter(new THREE.Vector3());
+
+						// set the camera to frame the box
+						frameArea(boxSize * 1.2, boxSize, boxCenter, camera);
+
+						// update the Trackball controls to handle the new size
+						controls.maxDistance = boxSize * 10;
+						controls.target.copy(boxCenter);
+						controls.update();
+					});
+				});
+
+				// Add the AR button to the body of the DOM
+				document.body.appendChild(ARButton.createButton(renderer));
+
+				window.addEventListener("resize", onWindowResize, false);
+			}
+
+			function onWindowResize() {
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize(window.innerWidth, window.innerHeight);
+			}
+
+			function animate() {
+				renderer.setAnimationLoop(render);
+			}
+
+			function toRadians(degrees) {
+				return (degrees * Math.PI) / 180;
+			}
+
+			// Converts from radians to degrees.
+			function toDegrees(radians) {
+				return (radians * 180) / Math.PI;
+			}
+
+			function bearing(startLat, startLng, destLat, destLng) {
+				startLat = toRadians(startLat);
+				startLng = toRadians(startLng);
+				destLat = toRadians(destLat);
+				destLng = toRadians(destLng);
+
+				let y = Math.sin(destLng - startLng) * Math.cos(destLat);
+				let x =
+					Math.cos(startLat) * Math.sin(destLat) -
+					Math.sin(startLat) * Math.cos(destLat) * Math.cos(destLng - startLng);
+				let brng = Math.atan2(y, x);
+				brng = toDegrees(brng);
+				return (brng + 360) % 360;
+			}
+
+			function render(timestamp, frame) {
+				if (navigator.geolocation) {
+					navigator.geolocation.getCurrentPosition(function showPosition(
+						position
+					) {
             
+            let brg = bearing(position.coords.latitude, position.coords.longitude, targetLat, targetLng)
+            /*
+            if (window.DeviceOrientationEvent) {
             
-            camera.updateMatrixWorld();
-            var vector = camera.position.clone();
-            vector.applyMatrix4( camera.matrixWorld );
+                window.addEventListener("deviceorientation", function () {                  
+                  alphaElem.textContent = event.alpha - initialAlpha
+                  if(initialAlpha == -1){
+                  initialAlpha = event.alpha                    
+                  }
+                  root.position.x = (event.alpha- initialAlpha) / -90
+                  betaElem.textContent = event.beta
+                  gammaElem.textContent = event.gamma
+                }, true)};
+           */
+            root.rotation.z = (Math.PI / 180) * (180 - brg);
             
-            console.log(vector);
-            scene.add(root);
-
-            // compute the box that contains all the stuff
-            // from root and below
-            const box = new THREE.Box3().setFromObject(root);
-
-            const boxSize = box.getSize(new THREE.Vector3()).length();
-            const boxCenter = box.getCenter(new THREE.Vector3());
-
-            // set the camera to frame the box
-            frameArea(boxSize * 1.2, boxSize, boxCenter, camera);
-
-            // update the Trackball controls to handle the new size
-            controls.maxDistance = boxSize * 10;
-            controls.target.copy(boxCenter);
-            controls.update();
+						latitudeElem.textContent = position.coords.latitude;
+						longitudeElem.textContent = position.coords.longitude;
+            testElem.textContent = brg
           });
-        });
+				}
 
-        // Add the AR button to the body of the DOM
-        document.body.appendChild(ARButton.createButton(renderer));
-
-        window.addEventListener("resize", onWindowResize, false);
-      }
-
-      function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      }
-
-      function animate() {
-        renderer.setAnimationLoop(render);
-      }
-
-      function render(timestamp, frame) {
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(function showPosition(
-            position
-          ) {
-            latitudeElem.textContent = position.coords.latitude;
-            longitudeElem.textContent = position.coords.longitude;
-          });
-        }
-
-        if (frame) {
-          let time2 = new Date();
-          let a = (time2 - time) / 1000;
-          if (a > 0.01) {
-            time = new Date();
-            
-            let xrCamera = renderer.xr.getCamera(camera);
-            var xrVector = xrCamera.position.clone();
-            xrVector.applyMatrix4( xrCamera.matrixWorld );
-            
-            let e = xrCamera.matrixWorld.elements;
-            let direction = new THREE.Vector3(-e[8], -e[9], -e[10]);
-            root.position.x = direction.x;
-            root.position.y = direction.y;
-            
-            
-            root.position.z = xrVector.z - 1
-            
-            zElem.textContent = JSON.stringify(xrVector);
-          }
-
+				if (frame) {
+					let time2 = new Date();
+					let a = (time2 - time) / 1000;
           
-        }
-        renderer.render(scene, camera);
-      }
-    </script>
-  </body>
+					if (a > 0.1) {
+             /*
+             if (window.DeviceOrientationEvent) {
+            
+                window.addEventListener("deviceorientation", function () {                  
+                  if(initialAlpha == -1){
+                  initialAlpha = event.alpha                    
+                  }
+                  let newAlpha = event.alpha - initialAlpha
+                  newAlpha = newAlpha - (newAlpha % 10)
+                  newAlpha = newAlpha.toPrecision(2)
+                  alphaElem.textContent = newAlpha
+                  let newPositionX = (newAlpha  / -45).toPrecision(2)
+                  if(newPositionX != root.position.x){
+                    root.position.x = newPositionX 
+                  }
+                  
+						      root.position.z = xrVector.z - 1 + (Math.abs(newAlpha) / 90);
+                  
+                  
+                  betaElem.textContent = root.position.x
+                  gammaElem.textContent = root.position.z
+                }, true)};
+            */
+            
+						
+            
+            if (window.DeviceOrientationEvent) {
+            window.addEventListener("deviceorientation", function () {  
+                  time = new Date();
+
+                  let xrCamera = renderer.xr.getCamera(camera);
+                  var xrVector = xrCamera.position.clone();
+                  xrVector.applyMatrix4(xrCamera.matrixWorld);
+
+                  let e = xrCamera.matrixWorld.elements;
+                  let direction = new THREE.Vector3(-e[8], -e[9], -e[10]);
+                  root.position.x = direction.x * 1.25;
+                  root.position.y = direction.y-0.1;
+                  if(initialAlpha == -1){
+                  initialAlpha = event.alpha                    
+                  }
+                  let newAlpha = event.alpha - initialAlpha
+                  
+                  let degree = newAlpha + 90
+                  
+                  if(degree < 0)
+                    degree += 360
+                  
+                  alphaElem.textContent = degree
+                  
+                  let a = 0
+                  root.position.z = xrVector.z - Math.sin(degree * Math.PI / 180)
+          
+                  gammaElem.textContent = JSON.stringify(direction.x);
+                    
+                }, true)};
+            
+            
+
+						
+					}
+				}
+				renderer.render(scene, camera);
+			}
+		</script>
+	</body>
 </html>
