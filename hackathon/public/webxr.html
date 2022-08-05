@@ -31,15 +31,8 @@
 
 	<body>
     <div id="mapid"></div>
-    <!--
-		<div>latitude:<span id="latitude"></span></div>
-		<div>longitude:<span id="longitude"></span></div>
-		<div>webxr-camera-z:<span id="webxrcameraz"></span></div>
-		<div>test:<span id="test"></span></div>
-		<div>alpha:<span id="alpha"></span></div>
-		<div>beta:<span id="beta"></span></div>
-		<div>gamma:<span id="gamma"></span></div>
-    -->
+    <div>console:<span id="console"></span></div>
+    <div>console2:<span id="console2"></span></div>
     <label for="destinations">Gitmek İstediğiniz Lokasyon : </label>
     <select name="destinations" id="destinations">    
     </select>
@@ -62,13 +55,8 @@
 			init();
 			animate();
 
-			const latitudeElem = document.querySelector("#latitude");
-			const longitudeElem = document.querySelector("#longitude");
-			const zElem = document.querySelector("#webxrcameraz");
-			const testElem = document.querySelector("#test");
-			const alphaElem = document.querySelector("#alpha");
-			const betaElem = document.querySelector("#beta");
-			const gammaElem = document.querySelector("#gamma");
+			const consoleElem = document.querySelector("#console");
+			const consoleElem2 = document.querySelector("#console2");
 
       const targetLat = 41.2001254
       const targetLng = 36.7219158
@@ -216,24 +204,9 @@
               lng: position.coords.longitude
             }));
             let brg = bearing(position.coords.latitude, position.coords.longitude, targetLat, targetLng)
-            /*
-            if (window.DeviceOrientationEvent) {
             
-                window.addEventListener("deviceorientation", function () {                  
-                  alphaElem.textContent = event.alpha - initialAlpha
-                  if(initialAlpha == -1){
-                  initialAlpha = event.alpha                    
-                  }
-                  root.position.x = (event.alpha- initialAlpha) / -90
-                  betaElem.textContent = event.beta
-                  gammaElem.textContent = event.gamma
-                }, true)};
-           */
             root.rotation.z = (Math.PI / 180) * (180 - brg);
-            /*
-						latitudeElem.textContent = position.coords.latitude;
-						longitudeElem.textContent = position.coords.longitude;
-            testElem.textContent = brg*/
+           
           });
 				}
 
@@ -241,32 +214,7 @@
 					let time2 = new Date();
 					let a = (time2 - time) / 1000;
           
-					if (a > 0.1) {
-             /*
-             if (window.DeviceOrientationEvent) {
-            
-                window.addEventListener("deviceorientation", function () {                  
-                  if(initialAlpha == -1){
-                  initialAlpha = event.alpha                    
-                  }
-                  let newAlpha = event.alpha - initialAlpha
-                  newAlpha = newAlpha - (newAlpha % 10)
-                  newAlpha = newAlpha.toPrecision(2)
-                  alphaElem.textContent = newAlpha
-                  let newPositionX = (newAlpha  / -45).toPrecision(2)
-                  if(newPositionX != root.position.x){
-                    root.position.x = newPositionX 
-                  }
-                  
-						      root.position.z = xrVector.z - 1 + (Math.abs(newAlpha) / 90);
-                  
-                  
-                  betaElem.textContent = root.position.x
-                  gammaElem.textContent = root.position.z
-                }, true)};
-            */
-            
-						
+					if (a > 0.1) {          
             
             if (window.DeviceOrientationEvent) {
             window.addEventListener("deviceorientation", function () {  
@@ -278,7 +226,7 @@
 
                   let e = xrCamera.matrixWorld.elements;
                   let direction = new THREE.Vector3(-e[8], -e[9], -e[10]);
-                  root.position.x = direction.x * 1.25;
+                  root.position.x = direction.x+xrVector.x;
                   root.position.y = direction.y-0.1;
                   if(initialAlpha == -1){
                   initialAlpha = event.alpha                    
@@ -290,10 +238,11 @@
                   if(degree < 0)
                     degree += 360
                   
-                  alphaElem.textContent = degree
+                  consoleElem.textContent = JSON.stringify(xrVector.x + " " + xrVector.y)
+                  consoleElem2.textContent = JSON.stringify(xrVector.z)
                   
                   let a = 0
-                  root.position.z = xrVector.z - Math.sin(degree * Math.PI / 180)
+                  root.position.z = xrVector.z - (Math.sin(degree * Math.PI / 180)*1)
           
                   gammaElem.textContent = JSON.stringify(direction.x);
                     
