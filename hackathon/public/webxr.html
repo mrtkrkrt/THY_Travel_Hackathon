@@ -5,6 +5,11 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 		<link type="text/css" rel="stylesheet" href="./webxrStyles.css" />
+    
+    
+    <script src="/locations.js" defer></script>
+    <script src="/djkstra.js" defer></script>
+    
 		<script
 			src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r126/three.js"
 			crossorigin="anonymous"
@@ -26,6 +31,7 @@
 
 	<body>
     <div id="mapid"></div>
+    <!--
 		<div>latitude:<span id="latitude"></span></div>
 		<div>longitude:<span id="longitude"></span></div>
 		<div>webxr-camera-z:<span id="webxrcameraz"></span></div>
@@ -33,6 +39,13 @@
 		<div>alpha:<span id="alpha"></span></div>
 		<div>beta:<span id="beta"></span></div>
 		<div>gamma:<span id="gamma"></span></div>
+    -->
+    <label for="destinations">Gitmek İstediğiniz Lokasyon : </label>
+    <select name="destinations" id="destinations">    
+    </select>
+    <button onclick="setDestination()">Rotayı Belirle</button>
+    <button onclick="muratClicked()">Sadece Murat Bassın</button>
+    
     
 		<script type="module">
 			// To start an AR scene with webXR, we can use a handy button provided by three.js
@@ -193,11 +206,15 @@
 			}
 
 			function render(timestamp, frame) {
+        
 				if (navigator.geolocation) {
 					navigator.geolocation.getCurrentPosition(function showPosition(
 						position
 					) {
-            
+            localStorage.setItem('gpsLocation', JSON.stringify({
+              lat : position.coords.latitude,
+              lng: position.coords.longitude
+            }));
             let brg = bearing(position.coords.latitude, position.coords.longitude, targetLat, targetLng)
             /*
             if (window.DeviceOrientationEvent) {
@@ -213,10 +230,10 @@
                 }, true)};
            */
             root.rotation.z = (Math.PI / 180) * (180 - brg);
-            
+            /*
 						latitudeElem.textContent = position.coords.latitude;
 						longitudeElem.textContent = position.coords.longitude;
-            testElem.textContent = brg
+            testElem.textContent = brg*/
           });
 				}
 

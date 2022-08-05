@@ -261,6 +261,8 @@ graph.addEdge("P", "R", distance(latLng["P"], latLng["R"]));
 graph.addEdge("P", "N", distance(latLng["P"], latLng["N"]));
 
 function betweenTwo(lat, lng) {
+  let minError = Number.MAX_SAFE_INTEGER
+  let between = ""
   for (const [key, value] of Object.entries(graph.adjacencyList)) {
     let nodeOne = latLng[key];
     for (let i = 0; i < value.length; i++) {
@@ -273,10 +275,61 @@ function betweenTwo(lat, lng) {
         Math.max(nodeOne.lng, nodeTwo.lng) > lng
       ) {
         console.log(key, value[i]["node"]);
-        break;
+        return [key, value[i]["node"]]
       }
+      let currentError = 0
+
+      let latError = 0
+      if(!(Math.min(nodeOne.lat, nodeTwo.lat) < lat && Math.max(nodeOne.lat, nodeTwo.lat) > lat)){
+        latError = Math.min(Math.abs(lat - nodeOne.lat), Math.abs(lat - nodeTwo.lat))
+      }
+
+      let lngError = 0
+      if(!(Math.min(nodeOne.lng, nodeTwo.lng) < lng && Math.max(nodeOne.lng, nodeTwo.lng) > lng)){
+        lngError = Math.min(Math.abs(lng - nodeOne.lng), Math.abs(lng - nodeTwo.lng))
+      }
+
+      currentError = latError + lngError
+
+      if(currentError < minError){
+        console.log(key, value[i]["node"], latError, lngError)
+        between = [key,value[i]["node"]]
+        minError = currentError
+      }
+
     }
   }
+  console.log(between)
+  return between
+
 }
 
-betweenTwo(41.037912193711165, 28.870593821994362);
+function main(){
+
+  const lat = 41.0375370594336
+  const lng = 28.870070136039054
+  const destination = "G"
+  
+  
+  for (const [key, value] of Object.entries(latLng)) {
+    if(value.lat == lat && value.lng == lng){
+      if(key == destination)
+        return "You already in destination location !!!"
+      
+      console.log(graph.Dijkstra("key", destination));
+      return
+    }
+  }
+  
+  let between = betweenTwo(lat, lng);
+  
+  // yeni node oluştur
+  graph.addVertex("New"); // 31
+  graph.addEdge(between[0], "New", distance(latLng[between[0]], {lat,lng}));
+  graph.addEdge(between[1], "New", distance(latLng[between[1]], {lat,lng}));
+  
+  console.log(graph.Dijkstra("New", destination));
+  
+}
+
+main()
