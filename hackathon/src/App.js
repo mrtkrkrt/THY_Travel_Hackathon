@@ -13,6 +13,8 @@ import WebXR from "./views/WebXR";
 //Components
 import Navigate from "./components/card/navigate.card";
 import Navbar from "./components/Navbar";
+import FlightInfo from "./views/FlightInfo";
+import BuyTicket from "./views/BuyTicket";
 
 export default function App() {
   return (
@@ -27,6 +29,8 @@ export default function App() {
         <Route path="/" element={<Pages />}/>
         <Route path="/webxr" element={<WebXR />}/>
         <Route path="/tourist-attractions" element={<TouristAttractions />}/>
+        <Route path="/flight-info" element={<FlightInfo />}/>
+        <Route path="/ticket" element={<BuyTicket />}/>
         </Routes>
       </Router>
     </>
