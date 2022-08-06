@@ -40,7 +40,7 @@ export default function TouristAttractions() {
 
 	return (
 		<div>
-			<Grid container spacing={3}>
+			<Grid container spacing={3} marginTop={3}>
 				<Grid item xs></Grid>
 				<Grid item xs={4}>
                     <Grid container spacing={2}>

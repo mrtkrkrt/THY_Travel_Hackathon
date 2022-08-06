@@ -23,10 +23,10 @@ export default function Pages() {
         {/* <Link to="/webxr">WebXr Sayfası</Link> */}
         <main className="main-card">
           {" "}
-          <Link to="/navigate">
+          <Link to="/webxr">
             <NavCard />
           </Link>
-          <Link to="/turistik">
+          <Link to="/tourist-attractions">
             <Turist />
           </Link>
           <Link to="flight-info">

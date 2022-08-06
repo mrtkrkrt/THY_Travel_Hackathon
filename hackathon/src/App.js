@@ -17,11 +17,11 @@ import Navbar from "./components/Navbar";
 export default function App() {
   return (
     <>
-      <Navbar />
       <Router>
-        <div>
+      <Navbar />
+        {/* <div>
         <AppBarComponent/>
-        </div>
+        </div> */}
 
         <Routes>
         <Route path="/" element={<Pages />}/>
