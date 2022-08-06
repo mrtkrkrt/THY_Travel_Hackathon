@@ -11,6 +11,9 @@ export default function Pages(){
             <li>
               <Link to="/webxr">WebXr Sayfası</Link>
             </li>
+            <li>
+            <Link to="/tourist-attractions">Turistik Yerler Sayfası</Link>
+            </li>
           </ul>
         </nav>
         </div>
