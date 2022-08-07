@@ -96,6 +96,7 @@ function FlightInfo() {
           </Button>
         </Box>
       </div>
+
       {result && result.data[0] && (
         <Ticket
           scheduledDepartureAirport={result.data[0].scheduledDepartureAirport}
