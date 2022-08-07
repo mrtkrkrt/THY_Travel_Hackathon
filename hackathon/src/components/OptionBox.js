@@ -1,43 +1,47 @@
-import {Box, Typography, Grid} from '@mui/material';
-import React from 'react';
+import {Box, Typography, Grid, Paper, ButtonBase} from '@mui/material';
 import Carousel from 'react-material-ui-carousel'
+import { styled } from '@mui/material/styles';
+import React, { useState, useEffect } from 'react';
 
 
 export default function OptionBox(props) {
     
-    // OptionBox menü tasarımı için oluşturuldu. 
-
-    // PROPS
     
-    // iconFile : Resim dosyasının ismi. Bu resim dosyası src/img klasöründe olmalı !
-    
-    // icon : Eğer ikonu bir komponent olarak vermek istiyorsan mesela Material UI içinden hazır bir ikon import etmişsen
-    // iconFile proponu null olarak bırakıp bu propa direk komponenti gir.
-    // title, description
-
     return (
-        <Box sx = {{flexGrow : 1, m : 3}}>
-            <Grid container spacing={5}>
-                <Grid item xs={4} justifyContent="flex-end" display="flex">
-                    {props.icons && 
-                        <Carousel sx ={{height:'250px', width:'500px'}}>
-                        {
-                            props.icons.map( (item, i) => <img src={item} sx={{minHeight:'250px', maxHeight:'250px'}} width="350" key={i}></img> )
-                        }
-                        </Carousel>
-                    }
-                    {props.iconFile && !props.icons && 
-                    <img src={props.iconFile} height="100%" width="350"></img>
-                    }
-                </Grid>
-                <Grid item xs={8}>
-                    <Grid container spacing={4}>
-                        <Grid item xs={12}>
-                            <Typography variant="h5">{props.title}</Typography>
-                        </Grid>
-                    </Grid>
-                </Grid>
+        <Paper
+      sx={{
+        p: 2,
+        flexGrow: 1,
+        backgroundColor: '#CC2424'}}
+    >
+      <Grid container spacing={2}>
+        <Grid item xs={8}>
+            <Carousel sx={{ width: props.optionBoxWidth, height: props.optionBoxHeight }}>
+            {props.icons && props.icons.map((e,i) => {
+                return(
+                    <img key = {i} alt="complex" src={props.icons[i]} 
+                    width = {props.optionBoxWidth} height = {props.optionBoxHeight}/>
+                )
+            })}
+            </Carousel>
+          
+        </Grid>
+        <Grid item xs={4} sm container>
+        <Grid container spacing={2}>
+            <Grid item xs={12}>
+                
+        <Typography fontSize={10} variant="button" color={'white'} component="div">
+            {props.title}
+        </Typography>
             </Grid>
-        </Box>
-    )
+            <Grid item xs={12}>
+            <Typography fontSize={10} variant="body1" color={'white'} component="div">
+            {props.info}
+            </Typography>
+            </Grid>
+        </Grid>
+        
+        </Grid>
+        </Grid>
+    </Paper>)
 }
