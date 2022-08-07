@@ -1,0 +1,366 @@
+<html lang="en">
+  <head>
+    <title>Basic Scene with WebXR</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link type="text/css" rel="stylesheet" href="webxr2/d.css" />
+
+    <script>
+      var params = location.href.split("?")[1].split("&");
+      data = {};
+      for (x in params) {
+        data[params[x].split("=")[0]] = params[x].split("=")[1];
+      }
+      localStorage.setItem("id", JSON.stringify(data));
+    </script>
+    <script src="/webxr2/locations.js" defer></script>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r126/three.js"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://r105.threejsfundamentals.org/threejs/resources/threejs/r105/js/controls/OrbitControls.js"></script>
+    <script src="https://r105.threejsfundamentals.org/threejs/resources/threejs/r105/js/loaders/LoaderSupport.js"></script>
+    <script src="https://r105.threejsfundamentals.org/threejs/resources/threejs/r105/js/loaders/OBJLoader2.js"></script>
+    <script src="https://r105.threejsfundamentals.org/threejs/resources/threejs/r105/js/loaders/MTLLoader.js"></script>
+  </head>
+
+  <body>
+    <br/>
+    <br/>
+    <br/>
+    <div class="about-section">
+      <h1 style="text-align: center">THY TRAVEL HACKATHON AUGMENTED REALITY</h1>
+    </div>
+
+    <h2 style="text-align: center">
+    <div style="font-size: 20">Mevcut Konum:<span id="console"></span></div>    
+    </h2>
+    <h2 style="text-align: center">
+    <div style="font-size: 20">İzlenecek Rota:<span id="console2"></span></div> 
+    </h2>
+    <h2 style="text-align: center">
+    <label for="destinations">Gitmek İstediğiniz Lokasyon : </label>
+    </h2>
+    <label for="destinations">Gitmek İstediğiniz Lokasyon : </label>
+    <select
+      name="destinations"
+      id="destinations"
+      style="font-size: 20"
+    ></select>
+    
+    <button onclick="setDestination()" style="width:50%;
+    margin-left:25%;
+    margin-right:25%;
+    font-size : 20">
+      Rotayı Belirle
+    </button>
+   
+    <div style="display: none">console3:<span id="console3"></span></div>
+    
+
+    <script>
+      const consoleElem2 = document.querySelector("#console2");
+      const consoleElem = document.querySelector("#console");
+      const consoleElem3 = document.querySelector("#console3");
+      const destinationsElem = document.querySelector("#destinations");
+    </script>
+
+    <script src="/webxr2/djkstra.js" defer></script>
+
+    <script type="module">
+      // To start an AR scene with webXR, we can use a handy button provided by three.js
+      // We first have to import it because it is a javascript module
+      import { ARButton } from "https://unpkg.com/three@0.126.0/examples/jsm/webxr/ARButton.js";
+
+      let camera, scene, renderer;
+      let mesh;
+      let root;
+      let time;
+      let cameraVector = new THREE.Vector3();
+      let initialAlpha = -1;
+
+      init();
+      animate();
+      let parsed_json = JSON.parse(localStorage.getItem("id"));
+
+      consoleElem.textContent = startPoints[parsed_json.id];
+
+      const destinationsElem = document.querySelector("#destinations");
+      for (const [key, value] of Object.entries(latLng)) {
+        if (key === startPoints[parsed_json.id]) continue;
+        let option = document.createElement("option");
+        option.text = key;
+        option.value = key;
+
+        destinationsElem.appendChild(option);
+      }
+
+      const targetLat = 41.2001254;
+      const targetLng = 36.7219158;
+
+      function init() {
+        time = new Date();
+        const container = document.createElement("div");
+        container.setAttribute("type", "hidden");
+
+        scene = new THREE.Scene();
+
+        camera = new THREE.PerspectiveCamera(
+          70,
+          window.innerWidth / window.innerHeight,
+          0.01,
+          40
+        );
+        const controls = new THREE.OrbitControls(camera, container);
+        controls.target.set(0, 5, 0);
+        controls.update();
+
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        // This next line is important to to enable the renderer for WebXR
+        renderer.xr.enabled = true; // New!
+        container.appendChild(renderer.domElement);
+
+        var light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
+        light.position.set(0.5, 1, 0.25);
+        scene.add(light);
+
+        function frameArea(sizeToFitOnScreen, boxSize, boxCenter, camera) {
+          const halfSizeToFitOnScreen = sizeToFitOnScreen * 0.5;
+          const halfFovY = THREE.Math.degToRad(camera.fov * 0.5);
+          const distance = halfSizeToFitOnScreen / Math.tan(halfFovY);
+          // compute a unit vector that points in the direction the camera is now
+          // in the xz plane from the center of the box
+          const direction = new THREE.Vector3()
+            .subVectors(camera.position, boxCenter)
+            .multiply(new THREE.Vector3(1, 0, 1))
+            .normalize();
+
+          // move the camera to a position distance units way from the center
+          // in whatever direction the camera was from the center already
+          camera.position.copy(
+            direction.multiplyScalar(distance).add(boxCenter)
+          );
+
+          // pick some near and far values for the frustum that
+          // will contain the box.
+          camera.near = boxSize / 100;
+          camera.far = boxSize * 100;
+
+          camera.updateProjectionMatrix();
+
+          // point the camera to look at the center of the box
+          camera.lookAt(boxCenter.x, boxCenter.y, boxCenter.z);
+        }
+
+        const objLoader = new THREE.OBJLoader2();
+        objLoader.loadMtl("/arrow.mtl", null, (materials) => {
+          objLoader.setMaterials(materials);
+          objLoader.load("/arrow.obj", (event) => {
+            root = event.detail.loaderRootNode;
+            root.scale.x = 0.3;
+            root.scale.y = 0.3;
+            root.scale.z = 0.3;
+            root.position.z = -1;
+            root.position.y = -0.5;
+            root.rotation.x = (Math.PI / 180) * 80;
+
+            camera.updateMatrixWorld();
+            var vector = camera.position.clone();
+            vector.applyMatrix4(camera.matrixWorld);
+
+            scene.add(root);
+
+            // compute the box that contains all the stuff
+            // from root and below
+            const box = new THREE.Box3().setFromObject(root);
+
+            const boxSize = box.getSize(new THREE.Vector3()).length();
+            const boxCenter = box.getCenter(new THREE.Vector3());
+
+            // set the camera to frame the box
+            frameArea(boxSize * 1.2, boxSize, boxCenter, camera);
+
+            // update the Trackball controls to handle the new size
+            controls.maxDistance = boxSize * 10;
+            controls.target.copy(boxCenter);
+            controls.update();
+          });
+        });
+
+        // Add the AR button to the body of the DOM
+        document.body.appendChild(ARButton.createButton(renderer));
+
+        window.addEventListener("resize", onWindowResize, false);
+      }
+
+      function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+
+      function animate() {
+        renderer.setAnimationLoop(render);
+      }
+
+      function toRadians(degrees) {
+        return (degrees * Math.PI) / 180;
+      }
+
+      // Converts from radians to degrees.
+      function toDegrees(radians) {
+        return (radians * 180) / Math.PI;
+      }
+
+      function bearing(startLat, startLng, destLat, destLng) {
+        startLat = toRadians(startLat);
+        startLng = toRadians(startLng);
+        destLat = toRadians(destLat);
+        destLng = toRadians(destLng);
+
+        let y = Math.sin(destLng - startLng) * Math.cos(destLat);
+        let x =
+          Math.cos(startLat) * Math.sin(destLat) -
+          Math.sin(startLat) * Math.cos(destLat) * Math.cos(destLng - startLng);
+        let brng = Math.atan2(y, x);
+        brng = toDegrees(brng);
+        return (brng + 360) % 360;
+      }
+
+      function render(timestamp, frame) {
+        /*
+				if (navigator.geolocation) {
+					navigator.geolocation.getCurrentPosition(function showPosition(
+						position
+					) {
+            localStorage.setItem('gpsLocation', JSON.stringify({
+              lat : position.coords.latitude,
+              lng: position.coords.longitude
+            }));
+            let brg = bearing(position.coords.latitude, position.coords.longitude, targetLat, targetLng)
+            
+            root.rotation.z = (Math.PI / 180) * (180 - brg);
+           
+          });
+				}*/
+
+        if (frame) {
+          let time2 = new Date();
+          let a = (time2 - time) / 1000;
+
+          if (a > 0.1) {
+            if (window.DeviceOrientationEvent) {
+              window.addEventListener(
+                "deviceorientation",
+                function () {
+                  time = new Date();
+
+                  let xrCamera = renderer.xr.getCamera(camera);
+                  var xrVector = xrCamera.position.clone();
+                  xrVector.applyMatrix4(xrCamera.matrixWorld);
+
+                  let e = xrCamera.matrixWorld.elements;
+                  let direction = new THREE.Vector3(-e[8], -e[9], -e[10]);
+                  root.position.x = direction.x + xrVector.x;
+                  root.position.y = direction.y - 0.1;
+                  if (initialAlpha == -1) {
+                    initialAlpha = event.alpha;
+                  }
+                  let newAlpha = event.alpha - initialAlpha;
+
+                  let degree = newAlpha + 90;
+
+                  if (degree < 0) degree += 360;
+
+                  let heading = localStorage.getItem("heading");
+
+                  let xr_vector_x = xrVector.x;
+                  let xr_vector_y = xrVector.y;
+                  let xr_vector_z = xrVector.z;
+
+                  function angle(cx, cy, ex, ey) {
+                    var dy = ey - cy;
+                    var dx = ex - cx;
+                    var theta = Math.atan2(dy, dx); // range (-PI, PI]
+                    theta *= 180 / Math.PI; // rads to degs, range (-180, 180]
+                    if (theta < 0) theta = 360 + theta; // range [0, 360)
+                    return theta;
+                  }
+
+                  let angle_ = angle(
+                    xr_vector_x,
+                    xr_vector_x,
+                    latLng[heading].lat,
+                    latLng[heading].lng
+                  );
+                  let distance_ = distance(
+                    { lat: xrVector.x, lng: xrVector.z },
+                    latLng[heading]
+                  );
+
+                  consoleElem.textContent =
+                    heading +
+                    " " +
+                    latLng[heading].lat +
+                    " " +
+                    latLng[heading].lng +
+                    " " +
+                    angle_;
+                  consoleElem2.textContent = distance_ + "";
+
+                  try {
+                    if (distance_ < 1.5) {
+                      let shortest_path = JSON.parse(
+                        localStorage.getItem("shortestPath")
+                      );
+
+                      if (shortest_path.length == 1) {
+                        alert(
+                          "Kullanıcı " + shortest_path[0] + " konumuna ulaştı"
+                        );
+                      } else {
+                        shortest_path.splice(0, 1);
+                        localStorage.setItem(
+                          "shortestPath",
+                          JSON.stringify(shortest_path)
+                        );
+                        heading = shortest_path[0];
+                        localStorage.setItem("heading", heading);
+                      }
+                    }
+
+                    let brg = bearing(
+                      xr_vector_x,
+                      xr_vector_y,
+                      latLng[heading].lat,
+                      latLng[heading].lng
+                    );
+
+                    root.rotation.z = (Math.PI / 180) * (90 + brg);
+
+                    consoleElem2.textContent = JSON.stringify(
+                      "x: " + xr_vector_x + "  z: " + xr_vector_z + " " + brg
+                    );
+
+                    let a = 0;
+                    root.position.z =
+                      xrVector.z - Math.sin((degree * Math.PI) / 180) * 1;
+                  } catch (e) {
+                    alert(e.message);
+                  }
+                },
+                true
+              );
+            }
+          }
+        }
+        renderer.render(scene, camera);
+      }
+    </script>
+  </body>
+</html>

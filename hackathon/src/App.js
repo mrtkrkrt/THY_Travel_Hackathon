@@ -9,6 +9,7 @@ import AppBarComponent from "./components/AppBarComponent";
 import Pages from "./views/Pages";
 import TouristAttractions from "./views/TouristAttractions";
 import WebXR from "./views/WebXR";
+import WebXR2 from "./views/WebXR2";
 
 //Components
 import Navigate from "./components/card/navigate.card";
@@ -31,6 +32,7 @@ export default function App() {
         <Routes>
         <Route path="/" element={<Pages />}/>
         <Route path="/webxr" element={<WebXR />}/>
+        <Route path="/webxr2/:id" element={<WebXR2 />}/>
         <Route path="/tourist-attractions" element={<TouristAttractions />}/>
         <Route path="/flight-info" element={<FlightInfo />}/>
         <Route path="/ticket" element={<BuyTicket />}/>
