@@ -1,0 +1,26 @@
+let non_latin_languages =  [
+    "arabic",
+    "armenian",
+    "chinese",
+    "farsi",
+    "georgian",
+    "greek",
+    "hebrew",
+    "hindi",
+    "japanese",
+    "kazakh",
+    "khmer",
+    "korean",
+    "mongolian",
+    "myanma",
+    "nepali",
+    "pashtu",
+    "russian",
+    "sanskrit",
+    "tamil",
+    "tibetian",
+    "thai",
+    "ukranian",
+    "urdu"]
+
+export default non_latin_languages

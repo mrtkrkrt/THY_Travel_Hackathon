@@ -2,14 +2,12 @@ import React, { useState, useEffect } from "react";
 import { List, ListItem, Box, Button, TextField, Grid } from "@mui/material";
 import axios from "axios";
 import OptionBox from "../components/OptionBox";
-import wtf from "wtf_wikipedia";
 import non_latin_languages from "../data/non_latin_languages.js";
-
 const LanguageDetect = require('languagedetect');
 const lngDetector = new LanguageDetect();
 
 
-export default function TouristAttractions() {
+export default function Accomodations() {
 	const [options, setOptions] = useState([]);
 	const [city, setCity] = useState("istanbul");
 
@@ -27,13 +25,14 @@ export default function TouristAttractions() {
 			}
 
 			let data = await axios.get(
-				`https://api-yapayzoid-thy-hackathon.glitch.me/get_interesting_places/${city}`
+				`https://api-yapayzoid-thy-hackathon.glitch.me/get_foods/${city}`
 			);
-			let list = data.data.interestingPlaces.features.slice(1, 10);
+            console.log(data)
+			let list = data.data.foods.features.slice(0,10);
 			console.log(list);
 			let optionsNew = [];
 			for (let i = 0; i < list.length; i++) {
-				if(non_latin_languages.includes(lngDetector.detect(list[i].properties.name, 1)[0][0]))
+                if(non_latin_languages.includes(lngDetector.detect(list[i].properties.name, 1)[0][0]))
                     continue
 
 				let keyword = `${city}+` + list[i].properties.name.replace(/ /g, "+");
@@ -44,29 +43,14 @@ export default function TouristAttractions() {
 				image = image.data;
 				console.log(list[i]);
 
-				let text = "";
-				let doc = await wtf.fetch(list[i].properties.name);
-				if (doc) {
-					let a = doc.json()["sections"][0];
-
-					console.log(a);
-					for (let i = 0; i < a.paragraphs.length; i++) {
-						if (a.paragraphs[i].sentences.length == 0) continue;
-						for (let j = 0; j < a.paragraphs[i].sentences.length; j++) {
-							text += a.paragraphs[i].sentences[j].text;
-						}
-						break
-					}
-				}
-				if(text !== "")
-					text = text.slice(0,200) + " ..."
+				let text = list[i].properties.rate;
+				
 				optionsNew.push({
 					icons: image.urls,
 					title: list[i].properties.name,
-					info: text,
+					rating: text,
 				});
 			}
-			console.log("ii");
 			setOptions(optionsNew);
 			console.log(optionsNew);
 		};

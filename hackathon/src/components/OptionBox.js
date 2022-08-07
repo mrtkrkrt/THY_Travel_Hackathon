@@ -2,6 +2,7 @@ import {Box, Typography, Grid, Paper, ButtonBase} from '@mui/material';
 import Carousel from 'react-material-ui-carousel'
 import { styled } from '@mui/material/styles';
 import React, { useState, useEffect } from 'react';
+import { Rating } from 'react-simple-star-rating'
 
 
 export default function OptionBox(props) {
@@ -35,9 +36,14 @@ export default function OptionBox(props) {
         </Typography>
             </Grid>
             <Grid item xs={12}>
-            <Typography fontSize={10} variant="body1" color={'white'} component="div">
-            {props.info}
-            </Typography>
+            {props.info && 
+                <Typography fontSize={10} variant="body1" color={'white'} component="div">
+                {props.info}
+                </Typography>
+            }
+            {props.rating && 
+                <Rating initialValue={parseInt(props.rating)} iconsCount={3} />
+            }
             </Grid>
         </Grid>
         

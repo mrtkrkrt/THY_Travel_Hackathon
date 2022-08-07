@@ -15,6 +15,9 @@ import Navigate from "./components/card/navigate.card";
 import Navbar from "./components/Navbar";
 import FlightInfo from "./views/FlightInfo";
 import BuyTicket from "./views/BuyTicket";
+import Accomodations from "./views/Accomodations";
+import Foods from "./views/Foods";
+
 
 export default function App() {
   return (
@@ -31,6 +34,8 @@ export default function App() {
         <Route path="/tourist-attractions" element={<TouristAttractions />}/>
         <Route path="/flight-info" element={<FlightInfo />}/>
         <Route path="/ticket" element={<BuyTicket />}/>
+        <Route path="/hotel" element={<Accomodations />}/>
+        <Route path="/food" element={<Foods />}/>
         </Routes>
       </Router>
     </>
