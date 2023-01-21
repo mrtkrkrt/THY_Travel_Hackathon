@@ -24,5 +24,3 @@ In addition to these features:
 ![hotel](https://user-images.githubusercontent.com/55550212/213853922-d1c5332e-315a-4aff-ab26-8f8ecdfd5112.png)
 
 ![bilet](https://user-images.githubusercontent.com/55550212/213853941-3870aba0-ccd9-4da7-8714-31e3823382d5.png)
-
-![webxrpage](https://user-images.githubusercontent.com/55550212/213853973-fb171aa4-c4d4-4bb1-b0b7-6cc35ddfdd03.png)
