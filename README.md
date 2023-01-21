@@ -16,3 +16,9 @@ In addition to these features:
 
 
 ![image](https://user-images.githubusercontent.com/55550212/213853229-1bd7f495-58f7-4bbc-a0f5-a0081aceb558.png)
+
+ file:///home/administrator/Downloads/biletal.png
+file:///home/administrator/Downloads/yemek.png
+file:///home/administrator/Downloads/hotel.png
+file:///home/administrator/Downloads/bilet.png
+file:///home/administrator/Downloads/webxrpage.png
